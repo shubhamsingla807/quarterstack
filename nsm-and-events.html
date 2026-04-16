@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quarterstack - NSM & Event Instrumentation</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script>
@@ -43,7 +44,7 @@
       </div>
       <div>
         <h1 class="text-sm font-semibold text-ink-900">Quarterstack</h1>
-        <p class="text-[11px] text-ink-700/50">NSM & Event Instrumentation</p>
+        <p class="text-xs text-ink-700/50">NSM & Event Instrumentation</p>
       </div>
       <div class="ml-auto flex items-center gap-3">
         <a href="product-pov.html" target="_blank" class="text-xs text-ink-700/50 hover:text-accent-600 font-medium">Product POV</a>
@@ -81,7 +82,7 @@
         <p class="text-sm text-accent-600/70 mt-1">Average time a PM takes to go from raw backlog to a committed quarterly plan.</p>
       </div>
 
-      <p class="text-xs text-ink-700/60 leading-relaxed mb-5 bg-white rounded-lg border border-surface-200 px-4 py-3 italic">
+      <p class="text-sm text-ink-700/60 leading-relaxed mb-5 bg-white rounded-lg border border-surface-200 px-4 py-3 italic">
         This product is fundamentally about reducing decision latency. The North Star needs to reflect how quickly a PM can arrive at a confident plan.
       </p>
 
@@ -112,16 +113,16 @@
       <div class="space-y-3 mb-5">
         <p class="text-xs font-semibold text-ink-700/40 uppercase tracking-wider">Why this, not something else</p>
         <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-          <p class="text-xs font-medium text-ink-800">"Plan completion rate" is too binary</p>
-          <p class="text-[11px] text-ink-700/50 mt-0.5">Tells you if they finished, not how fast. A PM who takes 3 days across 5 sessions technically "completed" the plan. That's not a win.</p>
+          <p class="text-sm font-medium text-ink-800">"Plan completion rate" is too binary</p>
+          <p class="text-sm text-ink-700/50 mt-0.5">Tells you if they finished, not how fast. A PM who takes 3 days across 5 sessions technically "completed" the plan. That's not a win.</p>
         </div>
         <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-          <p class="text-xs font-medium text-ink-800">"Features planned" is vanity</p>
-          <p class="text-[11px] text-ink-700/50 mt-0.5">More features doesn't mean better planning. 5 high-impact features in 30 minutes beats 15 in 3 hours.</p>
+          <p class="text-sm font-medium text-ink-800">"Features planned" is vanity</p>
+          <p class="text-sm text-ink-700/50 mt-0.5">More features doesn't mean better planning. 5 high-impact features in 30 minutes beats 15 in 3 hours.</p>
         </div>
         <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-          <p class="text-xs font-medium text-ink-800">"Agent messages sent" measures activity, not value</p>
-          <p class="text-[11px] text-ink-700/50 mt-0.5">Lots of chat might mean the AI is helpful, or it might mean the PM is confused. Activity is not progress.</p>
+          <p class="text-sm font-medium text-ink-800">"Agent messages sent" measures activity, not value</p>
+          <p class="text-sm text-ink-700/50 mt-0.5">Lots of chat might mean the AI is helpful, or it might mean the PM is confused. Activity is not progress.</p>
         </div>
       </div>
 
@@ -146,7 +147,7 @@
           </div>
           <div class="flex items-start gap-2 pt-2 border-t border-surface-200 mt-2">
             <span class="text-xs text-accent-600 font-bold mt-0.5">Metric</span>
-            <p class="text-xs text-ink-800 font-medium">Time delta between these two points.</p>
+            <p class="text-sm text-ink-800 font-medium">Time delta between these two points.</p>
           </div>
         </div>
       </div>
@@ -161,7 +162,7 @@
           Speed without quality is meaningless. To make sure faster planning doesn't mean sloppy planning, I'd track:
         </p>
         <p class="text-xs font-medium text-amber-800 mb-1">% of features changed after finalization</p>
-        <p class="text-[11px] text-amber-700/60 leading-relaxed">
+        <p class="text-xs text-amber-700/60 leading-relaxed">
           If PMs keep coming back to rearrange the plan after "finalizing" it, they either rushed or the tool gave them false confidence. A healthy rework rate is under 15%. Above that, the plan wasn't really done.
         </p>
       </div>
@@ -191,8 +192,8 @@
                 <h3 class="text-sm font-semibold text-ink-900">planning_session_started</h3>
                 <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-green-50 text-green-700">baseline</span>
               </div>
-              <p class="text-xs text-ink-700/60 leading-relaxed mb-1.5">Fires on first meaningful interaction: card expanded, score adjusted, or cut line moved.</p>
-              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> This is the start timestamp for the NSM. Without it, we can't measure "time to plan." Also tells us how many sessions get abandoned before completion, which is a churn signal for the tool itself.</p>
+              <p class="text-sm text-ink-700/60 leading-relaxed mb-1.5">Fires on first meaningful interaction: card expanded, score adjusted, or cut line moved.</p>
+              <p class="text-sm text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> This is the start timestamp for the NSM. Without it, we can't measure "time to plan." Also tells us how many sessions get abandoned before completion, which is a churn signal for the tool itself.</p>
               <div class="mt-2">
                 <span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-surface-100 text-ink-700/50">properties: backlog_size, features_pre_scored, timestamp</span>
               </div>
@@ -209,8 +210,8 @@
                 <h3 class="text-sm font-semibold text-ink-900">cut_line_moved</h3>
                 <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-green-50 text-green-700">critical</span>
               </div>
-              <p class="text-xs text-ink-700/60 leading-relaxed mb-1.5">Fires when the PM drags the cut line to a new position.</p>
-              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> This is the hero interaction. Every move is a scope decision. If nobody moves it, PMs are either accepting defaults blindly or the interaction isn't clear. High move frequency = active decision-making.</p>
+              <p class="text-sm text-ink-700/60 leading-relaxed mb-1.5">Fires when the PM drags the cut line to a new position.</p>
+              <p class="text-sm text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> This is the hero interaction. Every move is a scope decision. If nobody moves it, PMs are either accepting defaults blindly or the interaction isn't clear. High move frequency = active decision-making.</p>
               <div class="mt-2">
                 <span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-surface-100 text-ink-700/50">properties: old_position, new_position, features_above, is_over_capacity</span>
               </div>
@@ -227,8 +228,8 @@
                 <h3 class="text-sm font-semibold text-ink-900">plan_finalized</h3>
                 <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-green-50 text-green-700">critical</span>
               </div>
-              <p class="text-xs text-ink-700/60 leading-relaxed mb-1.5">Fires when the plan reaches a stable state: features above the line, effort within capacity, no more changes.</p>
-              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> The end timestamp for the NSM. Time delta between <code class="text-[10px] bg-surface-100 px-1 rounded">planning_session_started</code> and this event IS the North Star metric. Also captures plan shape: how many features, total effort, whether they went over capacity at any point during the session.</p>
+              <p class="text-sm text-ink-700/60 leading-relaxed mb-1.5">Fires when the plan reaches a stable state: features above the line, effort within capacity, no more changes.</p>
+              <p class="text-sm text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> The end timestamp for the NSM. Time delta between <code class="text-[10px] bg-surface-100 px-1 rounded">planning_session_started</code> and this event IS the North Star metric. Also captures plan shape: how many features, total effort, whether they went over capacity at any point during the session.</p>
               <div class="mt-2">
                 <span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-surface-100 text-ink-700/50">properties: session_duration_sec, features_in_plan, total_effort_weeks, score_adjustments_count, was_ever_over_capacity</span>
               </div>
@@ -245,8 +246,8 @@
                 <h3 class="text-sm font-semibold text-ink-900">ai_suggestion_accepted</h3>
                 <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-accent-50 text-accent-700">impact</span>
               </div>
-              <p class="text-xs text-ink-700/60 leading-relaxed mb-1.5">Fires when a PM acts on an AI agent's recommendation: keeps a pre-filled score, moves a feature the PO agent flagged, or follows a trade-off suggestion.</p>
-              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> Measures whether AI is actually reducing effort, not just being used. A PM who chats with the agent 20 times but ignores every suggestion gets zero value. This event tracks real impact. Also breaks down by agent type (Analyst vs PO) to show which agent drives more action.</p>
+              <p class="text-sm text-ink-700/60 leading-relaxed mb-1.5">Fires when a PM acts on an AI agent's recommendation: keeps a pre-filled score, moves a feature the PO agent flagged, or follows a trade-off suggestion.</p>
+              <p class="text-sm text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> Measures whether AI is actually reducing effort, not just being used. A PM who chats with the agent 20 times but ignores every suggestion gets zero value. This event tracks real impact. Also breaks down by agent type (Analyst vs PO) to show which agent drives more action.</p>
               <div class="mt-2">
                 <span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-surface-100 text-ink-700/50">properties: agent_type, suggestion_type (score/trade-off/swap), was_chat_initiated, time_to_accept_sec</span>
               </div>
@@ -263,8 +264,8 @@
                 <h3 class="text-sm font-semibold text-ink-900">score_adjusted</h3>
                 <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700">signal</span>
               </div>
-              <p class="text-xs text-ink-700/60 leading-relaxed mb-1.5">Fires when a PM changes any pre-filled score (Impact, Effort, or Confidence).</p>
-              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> Trust signal for the AI pre-fill. Ideal adjustment rate is 20-30%. Much higher means the AI is off. Much lower means PMs aren't engaging. Also tells us which dimension gets overridden most, so we can improve the model there first.</p>
+              <p class="text-sm text-ink-700/60 leading-relaxed mb-1.5">Fires when a PM changes any pre-filled score (Impact, Effort, or Confidence).</p>
+              <p class="text-sm text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> Trust signal for the AI pre-fill. Ideal adjustment rate is 20-30%. Much higher means the AI is off. Much lower means PMs aren't engaging. Also tells us which dimension gets overridden most, so we can improve the model there first.</p>
               <div class="mt-2">
                 <span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-surface-100 text-ink-700/50">properties: feature_id, field (impact/effort/confidence), old_value, new_value, delta</span>
               </div>
@@ -297,16 +298,16 @@
         </div>
         <div class="space-y-2">
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">Walk me through your last quarterly planning cycle. How many days did it take, start to finish?</p>
+            <p class="text-sm text-ink-800">Walk me through your last quarterly planning cycle. How many days did it take, start to finish?</p>
           </div>
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">Where did you spend the most time: gathering data, scoring things, or debating what makes the cut?</p>
+            <p class="text-sm text-ink-800">Where did you spend the most time: gathering data, scoring things, or debating what makes the cut?</p>
           </div>
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">How many tools did you touch during the process? What did each one do?</p>
+            <p class="text-sm text-ink-800">How many tools did you touch during the process? What did each one do?</p>
           </div>
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">Where does customer feedback, support data, and sales input actually live? How do you pull it into your planning?</p>
+            <p class="text-sm text-ink-800">Where does customer feedback, support data, and sales input actually live? How do you pull it into your planning?</p>
           </div>
         </div>
       </div>
@@ -319,13 +320,13 @@
         </div>
         <div class="space-y-2">
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">When you had to cut a feature from the plan, how did you make that call?</p>
+            <p class="text-sm text-ink-800">When you had to cut a feature from the plan, how did you make that call?</p>
           </div>
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">Do you use a scoring framework? If yes, do you trust the output, or do you override it based on gut?</p>
+            <p class="text-sm text-ink-800">Do you use a scoring framework? If yes, do you trust the output, or do you override it based on gut?</p>
           </div>
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">Think of a time you prioritized something that scored low but still felt right. What made you override the score?</p>
+            <p class="text-sm text-ink-800">Think of a time you prioritized something that scored low but still felt right. What made you override the score?</p>
           </div>
         </div>
       </div>
@@ -338,16 +339,16 @@
         </div>
         <div class="space-y-2">
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">What's the most frustrating part of prioritization today?</p>
+            <p class="text-sm text-ink-800">What's the most frustrating part of prioritization today?</p>
           </div>
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">Where do decisions get delayed the most? Missing data, too many opinions, or something else?</p>
+            <p class="text-sm text-ink-800">Where do decisions get delayed the most? Missing data, too many opinions, or something else?</p>
           </div>
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">What kind of information is hardest to gather when you're scoring a feature?</p>
+            <p class="text-sm text-ink-800">What kind of information is hardest to gather when you're scoring a feature?</p>
           </div>
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">What's one thing about planning you've just accepted as normal but wish was different?</p>
+            <p class="text-sm text-ink-800">What's one thing about planning you've just accepted as normal but wish was different?</p>
           </div>
         </div>
       </div>
@@ -360,16 +361,16 @@
         </div>
         <div class="space-y-2">
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">If AI could handle one part of your planning process, what would you hand off first?</p>
+            <p class="text-sm text-ink-800">If AI could handle one part of your planning process, what would you hand off first?</p>
           </div>
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">Where would you still want full control, even if AI could do it?</p>
+            <p class="text-sm text-ink-800">Where would you still want full control, even if AI could do it?</p>
           </div>
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">What would make you trust an automated prioritization system? What would break that trust?</p>
+            <p class="text-sm text-ink-800">What would make you trust an automated prioritization system? What would break that trust?</p>
           </div>
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">Have you tried using ChatGPT or similar for planning? What worked and what didn't?</p>
+            <p class="text-sm text-ink-800">Have you tried using ChatGPT or similar for planning? What worked and what didn't?</p>
           </div>
         </div>
       </div>
@@ -382,13 +383,13 @@
         </div>
         <div class="space-y-2">
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">Who else is involved in your quarterly planning? Eng leads, design, execs?</p>
+            <p class="text-sm text-ink-800">Who else is involved in your quarterly planning? Eng leads, design, execs?</p>
           </div>
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">When there's a disagreement about priorities, how does it get resolved? Who has the final call?</p>
+            <p class="text-sm text-ink-800">When there's a disagreement about priorities, how does it get resolved? Who has the final call?</p>
           </div>
           <div class="bg-white rounded-lg border border-surface-200 px-4 py-3">
-            <p class="text-xs text-ink-800">How do you communicate the plan to the rest of the team? What format does it end up in?</p>
+            <p class="text-sm text-ink-800">How do you communicate the plan to the rest of the team? What format does it end up in?</p>
           </div>
         </div>
       </div>
@@ -407,7 +408,7 @@
           Try the Prototype
         </a>
       </div>
-      <p class="text-[11px] text-ink-700/30 mt-4">Built by a PM who got tired of planning in spreadsheets</p>
+      <p class="text-xs text-ink-700/30 mt-4">Built by a PM who got tired of planning in spreadsheets</p>
     </div>
 
   </main>
