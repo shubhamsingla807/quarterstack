@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quarterstack — Product POV</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            accent: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' },
+            ink: { 700: '#334155', 800: '#1e293b', 900: '#0f172a' },
+            surface: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0' },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; }
+    .fade-in { animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .section { animation: fadeIn 0.5s ease backwards; }
+    .section:nth-child(2) { animation-delay: 0.05s; }
+    .section:nth-child(3) { animation-delay: 0.1s; }
+    .section:nth-child(4) { animation-delay: 0.15s; }
+    .section:nth-child(5) { animation-delay: 0.2s; }
+    .section:nth-child(6) { animation-delay: 0.25s; }
+    .section:nth-child(7) { animation-delay: 0.3s; }
+    .divider { height: 1px; background: linear-gradient(90deg, transparent, #e2e8f0, transparent); }
+  </style>
+</head>
+<body class="min-h-screen text-ink-900">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-2xl mx-auto px-6 py-3 flex items-center gap-3">
+      <div class="w-7 h-7 rounded-lg bg-accent-600 flex items-center justify-center">
+        <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-sm font-semibold text-ink-900">Quarterstack</h1>
+        <p class="text-[11px] text-ink-700/50">Product Point of View</p>
+      </div>
+      <a href="index.html" class="ml-auto text-xs text-accent-600 hover:text-accent-700 font-medium flex items-center gap-1">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+        Open Prototype
+      </a>
+    </div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-6 py-10">
+
+    <!-- Title -->
+    <div class="section mb-12 text-center">
+      <p class="text-xs font-medium text-accent-600 uppercase tracking-widest mb-3">Product Point of View</p>
+      <h1 class="text-2xl font-bold text-ink-900 mb-3">Quarterstack</h1>
+      <p class="text-sm text-ink-700/60 max-w-md mx-auto leading-relaxed">A quarterly planning tool that replaces the spreadsheet-meeting-roadmap cycle with one continuous surface powered by AI agents.</p>
+    </div>
+
+    <!-- The Problem -->
+    <div class="section mb-10">
+      <div class="flex items-center gap-2.5 mb-4">
+        <div class="w-6 h-6 rounded-md bg-red-50 flex items-center justify-center flex-shrink-0">
+          <svg class="w-3.5 h-3.5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+        </div>
+        <h2 class="text-sm font-semibold text-ink-900">The Problem</h2>
+      </div>
+      <p class="text-sm text-ink-700/70 leading-relaxed">
+        PMs don't lack frameworks. Every PM knows RICE, ICE, MoSCoW. The actual failure mode in quarterly planning is <strong class="text-ink-900">context switching</strong>. You pull data from Amplitude, customer feedback from Slack, revenue signal from Sales, ticket counts from Support — then consolidate it all into a spreadsheet, apply a framework, debate trade-offs in a meeting, and produce a plan in a third tool. Each switch is cognitive load. By the time you have a plan, it's already stale.
+      </p>
+    </div>
+
+    <div class="divider mb-10"></div>
+
+    <!-- The Bet -->
+    <div class="section mb-10">
+      <div class="flex items-center gap-2.5 mb-4">
+        <div class="w-6 h-6 rounded-md bg-accent-50 flex items-center justify-center flex-shrink-0">
+          <svg class="w-3.5 h-3.5 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+        </div>
+        <h2 class="text-sm font-semibold text-ink-900">The Bet</h2>
+      </div>
+      <div class="bg-accent-50 border border-accent-100 rounded-xl px-5 py-4">
+        <p class="text-sm font-medium text-accent-700 leading-relaxed">
+          Collapse the entire workflow into one continuous surface where scoring, deciding, and planning happen together — not sequentially.
+        </p>
+      </div>
+      <p class="text-sm text-ink-700/70 leading-relaxed mt-4">
+        Most tools separate "evaluate" from "decide" from "plan." You score features in one view, build a roadmap in another, and discuss trade-offs in a meeting. Quarterstack treats these as one fluid motion: features are pre-scored, the plan builds itself as you make decisions, and AI agents handle the grunt work of data collation and conflict detection. The PM's only job is judgment.
+      </p>
+    </div>
+
+    <div class="divider mb-10"></div>
+
+    <!-- Key Design Decisions -->
+    <div class="section mb-10">
+      <div class="flex items-center gap-2.5 mb-6">
+        <div class="w-6 h-6 rounded-md bg-violet-50 flex items-center justify-center flex-shrink-0">
+          <svg class="w-3.5 h-3.5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
+        </div>
+        <h2 class="text-sm font-semibold text-ink-900">Key Design Decisions</h2>
+      </div>
+
+      <div class="space-y-6">
+        <!-- Decision 1 -->
+        <div class="bg-white rounded-xl border border-surface-200 p-5">
+          <div class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-accent-100 flex items-center justify-center text-xs font-bold text-accent-600">1</span>
+            <div>
+              <h3 class="text-sm font-semibold text-ink-900 mb-1.5">No framework selection step</h3>
+              <p class="text-xs text-ink-700/60 leading-relaxed mb-2">We auto-apply RICE and show a "How scores work" tooltip. No framework picker.</p>
+              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> Asking a PM to choose between RICE, ICE, and MoSCoW before they've even started is an analytical choice that adds friction with zero value. The framework is infrastructure — it should be invisible.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Decision 2 -->
+        <div class="bg-white rounded-xl border border-surface-200 p-5">
+          <div class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-accent-100 flex items-center justify-center text-xs font-bold text-accent-600">2</span>
+            <div>
+              <h3 class="text-sm font-semibold text-ink-900 mb-1.5">One scrollable surface, not tabs or steps</h3>
+              <p class="text-xs text-ink-700/60 leading-relaxed mb-2">Backlog, cut line, and Gantt chart live on the same page. Scroll down = move through the workflow.</p>
+              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> Tabs and wizards create context switches. A PM adjusting a score needs to immediately see how it affects the plan. With one surface, cause and effect are visible simultaneously.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Decision 3 -->
+        <div class="bg-white rounded-xl border border-surface-200 p-5">
+          <div class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-accent-100 flex items-center justify-center text-xs font-bold text-accent-600">3</span>
+            <div>
+              <h3 class="text-sm font-semibold text-ink-900 mb-1.5">The Cut Line as the hero interaction</h3>
+              <p class="text-xs text-ink-700/60 leading-relaxed mb-2">A draggable divider separates "this quarter" from "not this quarter." Everything above auto-populates the Gantt.</p>
+              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> The single most important decision a PM makes is: what's in, what's out. Not scores. Not frameworks. The cut. We made this the central, most tactile interaction. The plan IS the list above the line.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Decision 4 -->
+        <div class="bg-white rounded-xl border border-surface-200 p-5">
+          <div class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-accent-100 flex items-center justify-center text-xs font-bold text-accent-600">4</span>
+            <div>
+              <h3 class="text-sm font-semibold text-ink-900 mb-1.5">Two specialized AI agents, not one generic chatbot</h3>
+              <p class="text-xs text-ink-700/60 leading-relaxed mb-2">An Analyst agent handles scores and data. A PO agent handles trade-offs and capacity. User switches via tabs.</p>
+              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> A generic "AI assistant" is a blank canvas. Specialized agents have clear jobs. This maps to how real teams work and aligns with the "Agents as Peers" principle.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Decision 5 -->
+        <div class="bg-white rounded-xl border border-surface-200 p-5">
+          <div class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-accent-100 flex items-center justify-center text-xs font-bold text-accent-600">5</span>
+            <div>
+              <h3 class="text-sm font-semibold text-ink-900 mb-1.5">Gantt with parallel streams, not monthly columns</h3>
+              <p class="text-xs text-ink-700/60 leading-relaxed mb-2">The plan renders as a Gantt with 2 parallel work streams across 12 weeks, bars sized by effort.</p>
+              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> Monthly columns are a calendar, not a plan. The Gantt shows reality: parallelism, effort consumption, and capacity. A PM glancing at it knows instantly if the plan is feasible.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Decision 6 -->
+        <div class="bg-white rounded-xl border border-surface-200 p-5">
+          <div class="flex items-start gap-3">
+            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-accent-100 flex items-center justify-center text-xs font-bold text-accent-600">6</span>
+            <div>
+              <h3 class="text-sm font-semibold text-ink-900 mb-1.5">Pre-enriched features with source links</h3>
+              <p class="text-xs text-ink-700/60 leading-relaxed mb-2">Every card arrives with scores pre-filled, data citations, and clickable source links (Slack, dashboards, meeting notes).</p>
+              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> The biggest time sink isn't scoring — it's gathering context. The Analyst agent has already done this. The PM reviews and adjusts, rather than starting from scratch.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider mb-10"></div>
+
+    <!-- What We Excluded -->
+    <div class="section mb-10">
+      <div class="flex items-center gap-2.5 mb-6">
+        <div class="w-6 h-6 rounded-md bg-slate-100 flex items-center justify-center flex-shrink-0">
+          <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+        </div>
+        <h2 class="text-sm font-semibold text-ink-900">What We Excluded</h2>
+      </div>
+
+      <div class="space-y-3">
+        <div class="flex items-start gap-3 bg-white rounded-lg border border-surface-200 px-4 py-3">
+          <span class="text-surface-300 mt-0.5 flex-shrink-0">&times;</span>
+          <div>
+            <p class="text-xs font-medium text-ink-800">Team collaboration / comments</p>
+            <p class="text-[11px] text-ink-700/50 mt-0.5">This is a single-PM planning tool. You discuss with the AI agents, not teammates in this flow.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-white rounded-lg border border-surface-200 px-4 py-3">
+          <span class="text-surface-300 mt-0.5 flex-shrink-0">&times;</span>
+          <div>
+            <p class="text-xs font-medium text-ink-800">Multi-quarter comparison</p>
+            <p class="text-[11px] text-ink-700/50 mt-0.5">Scope creep. One quarter at a time. Comparing Q2 vs Q3 is a reporting tool, not a planning tool.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-white rounded-lg border border-surface-200 px-4 py-3">
+          <span class="text-surface-300 mt-0.5 flex-shrink-0">&times;</span>
+          <div>
+            <p class="text-xs font-medium text-ink-800">Custom framework builder</p>
+            <p class="text-[11px] text-ink-700/50 mt-0.5">Serves 5% of PMs and violates zero cognitive load. RICE with adjustable sliders covers it.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-white rounded-lg border border-surface-200 px-4 py-3">
+          <span class="text-surface-300 mt-0.5 flex-shrink-0">&times;</span>
+          <div>
+            <p class="text-xs font-medium text-ink-800">Sprint-level capacity planning</p>
+            <p class="text-[11px] text-ink-700/50 mt-0.5">The unit here is weeks, not story points. The Gantt gives "roughly feasible" which is what a quarterly plan needs.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3 bg-white rounded-lg border border-surface-200 px-4 py-3">
+          <span class="text-surface-300 mt-0.5 flex-shrink-0">&times;</span>
+          <div>
+            <p class="text-xs font-medium text-ink-800">Notifications / reminders</p>
+            <p class="text-[11px] text-ink-700/50 mt-0.5">This is a "sit down and plan" experience, not a "check in daily" dashboard.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider mb-10"></div>
+
+    <!-- Design for Delight -->
+    <div class="section mb-10">
+      <div class="flex items-center gap-2.5 mb-6">
+        <div class="w-6 h-6 rounded-md bg-amber-50 flex items-center justify-center flex-shrink-0">
+          <svg class="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+        </div>
+        <h2 class="text-sm font-semibold text-ink-900">Design for Delight Alignment</h2>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3">
+        <div class="bg-white rounded-lg border border-surface-200 px-4 py-3 flex items-start gap-3">
+          <span class="text-[10px] font-bold text-accent-600 bg-accent-50 px-1.5 py-0.5 rounded mt-0.5 flex-shrink-0">ZCL</span>
+          <div>
+            <p class="text-xs font-medium text-ink-800">Zero Cognitive Load</p>
+            <p class="text-[11px] text-ink-700/50 mt-0.5">No framework picker. Scores pre-filled. Plan auto-generates. The PM makes judgment calls, not data entry.</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-surface-200 px-4 py-3 flex items-start gap-3">
+          <span class="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded mt-0.5 flex-shrink-0">SD</span>
+          <div>
+            <p class="text-xs font-medium text-ink-800">Smart Defaults</p>
+            <p class="text-[11px] text-ink-700/50 mt-0.5">Cut line starts at a sensible position. Scores pre-filled. New features get default scores. Dropdowns pre-selected.</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-surface-200 px-4 py-3 flex items-start gap-3">
+          <span class="text-[10px] font-bold text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded mt-0.5 flex-shrink-0">PD</span>
+          <div>
+            <p class="text-xs font-medium text-ink-800">Progressive Disclosure</p>
+            <p class="text-[11px] text-ink-700/50 mt-0.5">Collapsed cards show title + score. Expand for data, sources, sliders. Gantt appears below — you see it when ready.</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-surface-200 px-4 py-3 flex items-start gap-3">
+          <span class="text-[10px] font-bold text-accent-600 bg-accent-50 px-1.5 py-0.5 rounded mt-0.5 flex-shrink-0">IF</span>
+          <div>
+            <p class="text-xs font-medium text-ink-800">Instant Feedback</p>
+            <p class="text-[11px] text-ink-700/50 mt-0.5">Drag cut line — plan updates. Adjust slider — score pulses, list reorders. Delete — slide-out + undo toast. Confetti when plan fits capacity.</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-surface-200 px-4 py-3 flex items-start gap-3">
+          <span class="text-[10px] font-bold text-pink-600 bg-pink-50 px-1.5 py-0.5 rounded mt-0.5 flex-shrink-0">PB</span>
+          <div>
+            <p class="text-xs font-medium text-ink-800">Purpose-built Design</p>
+            <p class="text-[11px] text-ink-700/50 mt-0.5">The cut line is not a standard UI pattern. It's designed for the "what's in / what's out" decision. More intuitive than checkboxes or drag-to-bucket.</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-lg border border-surface-200 px-4 py-3 flex items-start gap-3">
+          <span class="text-[10px] font-bold text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded mt-0.5 flex-shrink-0">FM</span>
+          <div>
+            <p class="text-xs font-medium text-ink-800">Familiar Mental Models</p>
+            <p class="text-[11px] text-ink-700/50 mt-0.5">Drag to reorder (Trello). Sliders for scoring (any form). Chat sidebar (ChatGPT). Gantt chart (every PM tool). Nothing requires learning.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider mb-10"></div>
+
+    <!-- If I Had More Time -->
+    <div class="section mb-16">
+      <div class="flex items-center gap-2.5 mb-6">
+        <div class="w-6 h-6 rounded-md bg-emerald-50 flex items-center justify-center flex-shrink-0">
+          <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+        </div>
+        <h2 class="text-sm font-semibold text-ink-900">If I Had More Time</h2>
+      </div>
+
+      <div class="space-y-4">
+        <div class="flex items-start gap-3">
+          <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="text-[10px] font-bold text-emerald-600">1</span>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-ink-800">Agent actions that modify the board</p>
+            <p class="text-xs text-ink-700/50 mt-1 leading-relaxed">Right now agents give advice. Next step: "Move all infra features to Month 2" in the chat, and it actually happens. The PO agent becomes a pair-planning partner, not just an advisor.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="text-[10px] font-bold text-emerald-600">2</span>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-ink-800">Dependency visualization</p>
+            <p class="text-xs text-ink-700/50 mt-1 leading-relaxed">Draw lines between features that depend on each other. The Gantt auto-sequences them so dependent features never start before their blockers. The PO agent flags circular dependencies.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="text-[10px] font-bold text-emerald-600">3</span>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-ink-800">Scenario comparison</p>
+            <p class="text-xs text-ink-700/50 mt-1 leading-relaxed">"What if we cut Custom Dashboards and add Slack integration instead?" Save two plan versions side-by-side. Compare effort, theme coverage, and risk profile. Make the trade-off visual, not verbal.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center pb-10">
+      <div class="divider mb-6"></div>
+      <a href="index.html" class="inline-flex items-center gap-2 px-4 py-2 bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium rounded-lg transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+        Try the Prototype
+      </a>
+      <p class="text-[11px] text-ink-700/30 mt-4">Built with Claude Code</p>
+    </div>
+
+  </main>
+</body>
+</html>
