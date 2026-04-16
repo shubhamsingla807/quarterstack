@@ -803,6 +803,7 @@ function renderFeatures() {
         if (dragIndex < cutLineIndex && targetIndex >= cutLineIndex) cutLineIndex--;
         else if (dragIndex >= cutLineIndex && targetIndex < cutLineIndex) cutLineIndex++;
         features.splice(targetIndex, 0, moved);
+        markUserInteracted();
         renderAll();
       }
     });
@@ -859,6 +860,7 @@ function setupCutLineDrop() {
       });
       cutLineIndex = Math.max(0, Math.min(features.length, newIndex));
       playSnap();
+      markUserInteracted();
       renderAll();
     }
   });
@@ -894,6 +896,7 @@ function updateScore(id, field, value) {
       void scoreEl.offsetWidth; // force reflow
       scoreEl.classList.add('score-pulse');
     }
+    markUserInteracted();
     clearTimeout(window._sortTimer);
     window._sortTimer = setTimeout(() => { sortFeatures(); renderAll(); }, 600);
   }
@@ -910,6 +913,7 @@ function deleteFeature(id, btnEl) {
 
   card.classList.add('card-deleting');
   playWhoosh();
+  markUserInteracted();
 
   setTimeout(() => {
     const idx = features.findIndex(f => f.id === id);
@@ -1046,6 +1050,12 @@ function fireConfetti() {
 
 // Check if plan fits capacity — trigger delight
 let lastPlanState = null;
+let hasUserInteracted = false;
+let hasFirstCelebrated = false;
+
+function markUserInteracted() {
+  hasUserInteracted = true;
+}
 
 function checkPlanDelight() {
   const aboveLine = features.slice(0, cutLineIndex);
@@ -1068,8 +1078,14 @@ function checkPlanDelight() {
   const maxWeek = Math.max(...streamEnd);
   const fitsNow = maxWeek <= WEEKS_IN_QUARTER;
 
-  // Celebrate when going from over-capacity to fits!
-  if (lastPlanState === false && fitsNow) {
+  const shouldCelebrate =
+    // First valid plan after user has done something
+    (hasUserInteracted && !hasFirstCelebrated && fitsNow) ||
+    // Or transition from over-capacity back to fits
+    (lastPlanState === false && fitsNow);
+
+  if (shouldCelebrate) {
+    hasFirstCelebrated = true;
     fireConfetti();
     playChime();
     const ganttEl = document.getElementById('gantt-container');
@@ -1158,6 +1174,7 @@ function addFeature() {
   // Add below the cut line (backlog, not committed)
   features.push(newFeature);
   playPop();
+  markUserInteracted();
 
   // Reset form
   titleInput.value = '';
