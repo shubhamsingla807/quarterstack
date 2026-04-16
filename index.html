@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quarterstack — Quarterly Planning Tool</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            surface: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1' },
+            ink: { 700: '#334155', 800: '#1e293b', 900: '#0f172a' },
+            accent: { 50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' },
+            green: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a' },
+            amber: { 50: '#fffbeb', 100: '#fef3c7', 500: '#f59e0b', 600: '#d97706' },
+            red: { 50: '#fef2f2', 100: '#fee2e2', 500: '#ef4444', 600: '#dc2626' },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; color: #0f172a; }
+
+    .card-enter { animation: cardEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes cardEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Cut line */
+    .cut-line { position: relative; cursor: grab; user-select: none; transition: all 0.2s ease; }
+    .cut-line:hover { transform: scaleY(1.1); }
+    .cut-line:active { cursor: grabbing; }
+    .cut-line-inner { height: 3px; background: linear-gradient(90deg, transparent, #3b82f6, #3b82f6, transparent); border-radius: 2px; }
+
+    /* Feature cards */
+    .feature-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+    .feature-card:hover { transform: translateX(2px); }
+    .feature-card.dragging { opacity: 0.5; transform: scale(0.98); }
+    .feature-card.drag-over-top { border-top: 2px solid #3b82f6; }
+    .feature-card.drag-over-bottom { border-bottom: 2px solid #3b82f6; }
+    .feature-card.below-line { opacity: 0.55; }
+    .feature-card.below-line:hover { opacity: 0.8; }
+
+    .score-bar { transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+    /* Sliders */
+    input[type="range"] { -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: #e2e8f0; outline: none; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #3b82f6; cursor: pointer; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.2); transition: transform 0.15s ease; }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+    /* Chat */
+    .chat-message { animation: msgAppear 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes msgAppear { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .typing-indicator span { display: inline-block; width: 6px; height: 6px; background: #94a3b8; border-radius: 50%; margin: 0 1.5px; animation: typing 1.2s infinite; }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
+
+    /* Gantt */
+    .gantt-bar { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); animation: ganttGrow 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes ganttGrow { from { width: 0; opacity: 0; } to { opacity: 1; } }
+    .gantt-bar:hover { filter: brightness(1.08); transform: scaleY(1.15); }
+
+    /* Tooltip */
+    .tooltip { visibility: hidden; opacity: 0; transition: all 0.15s ease; }
+    .tooltip-trigger:hover .tooltip { visibility: visible; opacity: 1; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    .capacity-fill { transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .badge-pulse { animation: badgePulse 2s infinite; }
+    @keyframes badgePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+    /* Agent tabs */
+    .agent-tab { transition: all 0.2s ease; cursor: pointer; }
+    .agent-tab.active-analyst { background: #eff6ff; border-color: #3b82f6; color: #2563eb; }
+    .agent-tab.active-po { background: #f5f3ff; border-color: #8b5cf6; color: #7c3aed; }
+    .agent-tab:not(.active-analyst):not(.active-po):hover { background: #f1f5f9; }
+    .agent-tab .dot-indicator { display: none; }
+    .agent-tab.suggested .dot-indicator { display: block; }
+
+    /* Source links */
+    .source-link { transition: all 0.15s ease; }
+    .source-link:hover { background: #dbeafe; }
+
+    /* Delete button */
+    .delete-btn { opacity: 0; transition: opacity 0.15s ease; }
+    .feature-card:hover .delete-btn { opacity: 1; }
+
+    /* Card slide-out on delete */
+    .card-deleting { animation: slideOut 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    @keyframes slideOut { to { opacity: 0; transform: translateX(40px) scale(0.95); height: 0; margin: 0; padding: 0; overflow: hidden; } }
+
+    /* Score pulse */
+    .score-pulse { animation: scorePop 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes scorePop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+    /* Cut line badge pop */
+    .badge-pop { animation: badgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes badgePop { 0% { transform: scale(0.8); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+
+    /* Confetti canvas */
+    #confetti-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 9999; }
+
+    /* Gantt stagger */
+    .gantt-row { opacity: 0; animation: ganttRowIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    @keyframes ganttRowIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Success glow on plan section */
+    .plan-success { animation: successGlow 1.5s ease; }
+    @keyframes successGlow { 0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.3); } 50% { box-shadow: 0 0 20px 4px rgba(34,197,94,0.15); } 100% { box-shadow: 0 0 0 0 transparent; } }
+
+    /* Undo toast */
+    .undo-toast { animation: toastIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    .undo-toast.hiding { animation: toastOut 0.25s ease forwards; }
+    @keyframes toastOut { to { opacity: 0; transform: translateY(10px) scale(0.95); } }
+
+    /* Inline edit */
+    .title-editing { background: #eff6ff; border-radius: 4px; padding: 1px 4px; outline: none; border: 1px solid #3b82f6; }
+
+    /* Source tag in add form */
+    .new-source-tag { animation: cardEnter 0.2s ease; }
+  </style>
+</head>
+<body class="min-h-screen">
+  <canvas id="confetti-canvas"></canvas>
+  <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50"></div>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-surface-200">
+    <div class="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-accent-600 flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-sm font-semibold text-ink-900">Quarterstack</h1>
+          <p class="text-xs text-ink-700/60">Q3 2026 Planning</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <div id="capacity-indicator" class="flex items-center gap-2 text-xs">
+          <span class="text-ink-700/60">Capacity</span>
+          <div class="w-24 h-1.5 bg-surface-200 rounded-full overflow-hidden">
+            <div id="capacity-bar" class="capacity-fill h-full bg-green-500 rounded-full" style="width: 0%"></div>
+          </div>
+          <span id="capacity-text" class="text-ink-700 font-medium">0/10</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="max-w-6xl mx-auto flex">
+
+    <!-- Main Content -->
+    <main class="flex-1 px-6 py-6 min-h-screen" id="main-content">
+
+      <!-- Prioritized Backlog -->
+      <div class="mb-4">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-sm font-semibold text-ink-900">Prioritized Backlog</h2>
+            <p class="text-xs text-ink-700/50 mt-0.5">Auto-ranked by impact, effort, and confidence. Drag to reorder.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="tooltip-trigger relative">
+              <button class="text-xs text-accent-600 hover:text-accent-700 font-medium flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                How scores work
+              </button>
+              <div class="tooltip absolute right-0 top-full mt-2 w-64 bg-ink-900 text-white text-xs rounded-lg p-3 shadow-xl z-30">
+                <p class="font-medium mb-1.5">RICE Framework (auto-applied)</p>
+                <p class="text-white/70 leading-relaxed">Score = (Impact x Confidence) / Effort. Pre-filled by the Analyst agent from support tickets, customer calls, and analytics.</p>
+              </div>
+            </div>
+            <button id="add-feature-btn" onclick="toggleAddForm()" class="flex items-center gap-1.5 px-3 py-1.5 bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium rounded-lg transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Add feature
+            </button>
+          </div>
+        </div>
+
+        <!-- Add Feature Form (hidden by default) -->
+        <div id="add-feature-form" class="hidden mb-3 bg-white rounded-lg border-2 border-dashed border-accent-300 p-4 card-enter">
+          <div class="space-y-3">
+            <div class="flex items-start gap-3">
+              <div class="flex-1 space-y-3">
+                <input id="new-feature-title" type="text" placeholder="Feature name" class="w-full text-sm px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500/20" onkeydown="if(event.key==='Enter')addFeature(); if(event.key==='Escape')toggleAddForm();" />
+                <div class="flex items-center gap-2 flex-wrap">
+                  <select id="new-feature-source" class="text-xs px-2.5 py-1.5 bg-surface-50 border border-surface-200 rounded-lg outline-none focus:border-accent-500">
+                    <option value="customer">Customer</option>
+                    <option value="internal">Internal</option>
+                    <option value="sales">Sales</option>
+                    <option value="support">Support</option>
+                  </select>
+                  <select id="new-feature-theme" class="text-xs px-2.5 py-1.5 bg-surface-50 border border-surface-200 rounded-lg outline-none focus:border-accent-500">
+                    <option value="Core Product">Core Product</option>
+                    <option value="Enterprise">Enterprise</option>
+                    <option value="AI Features">AI Features</option>
+                    <option value="Growth">Growth</option>
+                    <option value="Mobile">Mobile</option>
+                    <option value="Integrations">Integrations</option>
+                    <option value="Infrastructure">Infrastructure</option>
+                    <option value="UX Polish">UX Polish</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex items-center gap-1.5 flex-shrink-0">
+                <button onclick="addFeature()" class="px-3 py-1.5 bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium rounded-lg transition-colors">Add</button>
+                <button onclick="toggleAddForm()" class="px-3 py-1.5 bg-surface-100 hover:bg-surface-200 text-ink-700 text-xs font-medium rounded-lg transition-colors">Cancel</button>
+              </div>
+            </div>
+            <!-- Source links -->
+            <div id="new-feature-sources-section">
+              <p class="text-[10px] font-medium text-ink-700/40 uppercase tracking-wider mb-1.5">Link sources <span class="normal-case font-normal">(optional)</span></p>
+              <div id="new-feature-sources" class="flex flex-wrap gap-1.5 mb-2"></div>
+              <div class="flex items-center gap-2">
+                <select id="new-source-type" class="text-[11px] px-2 py-1 bg-surface-50 border border-surface-200 rounded-md outline-none focus:border-accent-500">
+                  <option value="slack">Slack thread</option>
+                  <option value="dashboard">Dashboard</option>
+                  <option value="doc">Document</option>
+                  <option value="meeting">Meeting note</option>
+                  <option value="support">Support ticket</option>
+                </select>
+                <input id="new-source-label" type="text" placeholder="e.g. #product-feedback or Q2 NPS Dashboard" class="flex-1 text-[11px] px-2 py-1 bg-surface-50 border border-surface-200 rounded-md outline-none focus:border-accent-500" onkeydown="if(event.key==='Enter'){event.preventDefault(); addSourceToNew();}" />
+                <button onclick="addSourceToNew()" class="text-[11px] px-2 py-1 text-accent-600 hover:text-accent-700 hover:bg-accent-50 rounded-md transition-colors font-medium">+ Add</button>
+              </div>
+            </div>
+            <p class="text-[10px] text-ink-700/30">Scores will be auto-filled by the Analyst agent</p>
+          </div>
+        </div>
+
+        <div id="features-container" class="space-y-2"></div>
+      </div>
+
+      <!-- Quarterly Plan — Gantt -->
+      <div id="plan-section" class="mt-8">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-5 h-5 rounded-md bg-green-100 flex items-center justify-center">
+            <svg class="w-3 h-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 class="text-sm font-semibold text-ink-900">Q3 2026 Plan</h2>
+          <span id="plan-count" class="text-xs text-ink-700/50 ml-1"></span>
+        </div>
+        <div id="gantt-container" class="bg-white rounded-lg border border-surface-200 overflow-hidden"></div>
+      </div>
+
+    </main>
+
+    <!-- Chat Sidebar -->
+    <aside id="chat-sidebar" class="w-80 border-l border-surface-200 bg-white flex flex-col sticky top-[49px]" style="height: calc(100vh - 49px)">
+
+      <!-- Agent Tabs -->
+      <div class="px-3 pt-3 pb-0">
+        <div class="flex gap-2">
+          <div id="tab-analyst" class="agent-tab flex-1 rounded-lg border border-surface-200 px-3 py-2 active-analyst" onclick="switchAgent('analyst')">
+            <div class="flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3 text-accent-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <p class="text-[11px] font-semibold leading-tight">Analyst</p>
+                <p class="text-[9px] text-ink-700/50 leading-tight">Scores, data, context</p>
+              </div>
+              <div class="dot-indicator w-1.5 h-1.5 rounded-full bg-accent-500 badge-pulse ml-auto flex-shrink-0"></div>
+            </div>
+          </div>
+          <div id="tab-po" class="agent-tab flex-1 rounded-lg border border-surface-200 px-3 py-2" onclick="switchAgent('po')">
+            <div class="flex items-center gap-1.5">
+              <div class="w-5 h-5 rounded-full bg-violet-100 flex items-center justify-center flex-shrink-0">
+                <svg class="w-3 h-3 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+              </div>
+              <div class="min-w-0">
+                <p class="text-[11px] font-semibold leading-tight">PO</p>
+                <p class="text-[9px] text-ink-700/50 leading-tight">Trade-offs, risks</p>
+              </div>
+              <div class="dot-indicator w-1.5 h-1.5 rounded-full bg-violet-500 badge-pulse ml-auto flex-shrink-0"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Messages -->
+      <div id="chat-messages" class="flex-1 overflow-y-auto px-4 py-3 space-y-3"></div>
+
+      <!-- Chat Input -->
+      <div class="px-4 py-3 border-t border-surface-200">
+        <div class="flex items-center gap-2">
+          <input id="chat-input" type="text" placeholder="Ask about scores, data, trade-offs..." class="flex-1 text-sm px-3 py-2 bg-surface-50 border border-surface-200 rounded-lg outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500/20 transition-all" />
+          <button id="chat-send" class="w-8 h-8 bg-accent-600 hover:bg-accent-700 text-white rounded-lg flex items-center justify-center transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+<script>
+// ============================================
+// DATA
+// ============================================
+const FEATURES = [
+  {
+    id: 1, title: "SSO & SAML Integration",
+    description: "Enterprise customers need single sign-on to comply with security policies.",
+    source: "customer", sourceDetail: "Requested by 8 enterprise accounts, 3 in active deals",
+    impact: 9, effort: 7, confidence: 8, theme: "Enterprise",
+    dataNote: "12 support tickets, mentioned in 3 renewal calls",
+    sources: [
+      { label: "#enterprise-requests", type: "slack", url: "#" },
+      { label: "Q2 Renewal Dashboard", type: "dashboard", url: "#" },
+      { label: "Security audit findings", type: "doc", url: "#" }
+    ]
+  },
+  {
+    id: 2, title: "Smart Task Dependencies",
+    description: "Auto-detect and visualize task dependencies to prevent bottlenecks.",
+    source: "internal", sourceDetail: "Engineering team request, validated by 5 customer interviews",
+    impact: 8, effort: 6, confidence: 7, theme: "Core Product",
+    dataNote: "40% of projects have implicit dependencies causing delays",
+    sources: [
+      { label: "Eng retro notes — Apr 12", type: "doc", url: "#" },
+      { label: "Customer interview #14, #17, #19", type: "meeting", url: "#" },
+      { label: "Project analytics", type: "dashboard", url: "#" }
+    ]
+  },
+  {
+    id: 3, title: "AI Meeting Summarizer",
+    description: "Auto-generate action items and tasks from meeting transcripts.",
+    source: "customer", sourceDetail: "Top-requested feature in Q2 NPS survey",
+    impact: 9, effort: 5, confidence: 9, theme: "AI Features",
+    dataNote: "NPS survey: 34% mentioned meeting follow-ups as pain point",
+    sources: [
+      { label: "Q2 NPS raw responses", type: "dashboard", url: "#" },
+      { label: "#product-feedback", type: "slack", url: "#" },
+      { label: "Transcript pipeline docs", type: "doc", url: "#" }
+    ]
+  },
+  {
+    id: 4, title: "Mobile Push Notifications",
+    description: "Real-time push alerts for task assignments, mentions, and due dates.",
+    source: "customer", sourceDetail: "Mobile app reviews consistently mention this",
+    impact: 7, effort: 4, confidence: 9, theme: "Mobile",
+    dataNote: "App store rating 3.2. Missing push cited in 28% of 1-star reviews.",
+    sources: [
+      { label: "App Store review analysis", type: "dashboard", url: "#" },
+      { label: "#mobile-feedback", type: "slack", url: "#" }
+    ]
+  },
+  {
+    id: 5, title: "Custom Dashboards",
+    description: "Let managers build their own dashboards with drag-and-drop widgets.",
+    source: "sales", sourceDetail: "Deal blocker for 2 enterprise prospects ($180K ARR combined)",
+    impact: 8, effort: 8, confidence: 6, theme: "Enterprise",
+    dataNote: "Competitive loss to Monday.com in 4 deals citing this gap",
+    sources: [
+      { label: "Lost deal analysis — Q2", type: "doc", url: "#" },
+      { label: "Sales pipeline (Salesforce)", type: "dashboard", url: "#" },
+      { label: "#deals-lost", type: "slack", url: "#" }
+    ]
+  },
+  {
+    id: 6, title: "API Rate Limiting & Throttling",
+    description: "Prevent API abuse and ensure fair usage across customers.",
+    source: "internal", sourceDetail: "3 incidents in Q2 caused by API overuse",
+    impact: 6, effort: 3, confidence: 9, theme: "Infrastructure",
+    dataNote: "Last incident: 45min downtime, 200+ affected users",
+    sources: [
+      { label: "Incident post-mortem #47", type: "doc", url: "#" },
+      { label: "API usage dashboard", type: "dashboard", url: "#" }
+    ]
+  },
+  {
+    id: 7, title: "Workflow Automations Builder",
+    description: "Visual builder for if-this-then-that automations on task events.",
+    source: "customer", sourceDetail: "8 customers using Zapier workarounds",
+    impact: 9, effort: 9, confidence: 7, theme: "Core Product",
+    dataNote: "Zapier integration has 340 active connections — signals demand",
+    sources: [
+      { label: "Zapier usage metrics", type: "dashboard", url: "#" },
+      { label: "Customer interview #22", type: "meeting", url: "#" },
+      { label: "#automation-requests", type: "slack", url: "#" }
+    ]
+  },
+  {
+    id: 8, title: "Onboarding Checklist Revamp",
+    description: "Redesign first-time experience with interactive product tour.",
+    source: "internal", sourceDetail: "Activation rate dropped 12% after Q1 UI changes",
+    impact: 8, effort: 4, confidence: 8, theme: "Growth",
+    dataNote: "D7 retention: 31% (down from 43%). Activation funnel drop at step 3.",
+    sources: [
+      { label: "Activation funnel (Mixpanel)", type: "dashboard", url: "#" },
+      { label: "Onboarding session recordings", type: "dashboard", url: "#" },
+      { label: "#growth-team", type: "slack", url: "#" }
+    ]
+  },
+  {
+    id: 9, title: "Time Tracking Integration",
+    description: "Native time tracking on tasks with reports for billing and capacity.",
+    source: "customer", sourceDetail: "Agency segment (22% of revenue) using Toggl alongside us",
+    impact: 7, effort: 6, confidence: 7, theme: "Core Product",
+    dataNote: "Agency churn 2x higher than SaaS segment. Time tracking cited in 40% of exit surveys.",
+    sources: [
+      { label: "Churn analysis — Agency", type: "dashboard", url: "#" },
+      { label: "Exit survey responses", type: "doc", url: "#" },
+      { label: "#agency-success", type: "slack", url: "#" }
+    ]
+  },
+  {
+    id: 10, title: "Slack Threads → Tasks",
+    description: "Convert Slack messages into tasks with one click, preserving context.",
+    source: "customer", sourceDetail: "Power user segment consistently requests this",
+    impact: 7, effort: 3, confidence: 8, theme: "Integrations",
+    dataNote: "Slack integration used by 67% of teams. 'Create task' is #1 feature request.",
+    sources: [
+      { label: "Integration usage stats", type: "dashboard", url: "#" },
+      { label: "#integrations-feedback", type: "slack", url: "#" }
+    ]
+  },
+  {
+    id: 11, title: "Bulk Import from Jira",
+    description: "One-click migration tool for teams switching from Jira.",
+    source: "sales", sourceDetail: "Sales team losing 30min per demo on migration questions",
+    impact: 6, effort: 5, confidence: 8, theme: "Growth",
+    dataNote: "60% of pipeline comes from Jira displacement. Migration is top objection.",
+    sources: [
+      { label: "Sales objection tracker", type: "dashboard", url: "#" },
+      { label: "Demo call recordings", type: "meeting", url: "#" }
+    ]
+  },
+  {
+    id: 12, title: "Guest Access for Clients",
+    description: "Limited-permission access for external stakeholders to view progress.",
+    source: "customer", sourceDetail: "Agency and consulting teams need this for client reporting",
+    impact: 6, effort: 5, confidence: 7, theme: "Enterprise",
+    dataNote: "5 agency accounts churned in Q2, 3 cited client visibility as reason",
+    sources: [
+      { label: "Agency churn exit interviews", type: "meeting", url: "#" },
+      { label: "#cs-escalations", type: "slack", url: "#" }
+    ]
+  },
+  {
+    id: 13, title: "Dark Mode",
+    description: "System-wide dark theme matching OS preferences.",
+    source: "support", sourceDetail: "142 support tickets in Q2, mostly developer teams",
+    impact: 4, effort: 3, confidence: 9, theme: "UX Polish",
+    dataNote: "142 tickets but low business impact. Developer personas rate it high.",
+    sources: [
+      { label: "Support ticket analysis", type: "dashboard", url: "#" }
+    ]
+  },
+  {
+    id: 14, title: "AI Task Prioritization Agent",
+    description: "Agent that auto-suggests task priority based on deadlines, dependencies, and team load.",
+    source: "internal", sourceDetail: "Aligns with company AI-native positioning",
+    impact: 8, effort: 7, confidence: 5, theme: "AI Features",
+    dataNote: "No direct customer request but strong strategic alignment. Low confidence — novel feature.",
+    sources: [
+      { label: "Product strategy doc — Q3", type: "doc", url: "#" },
+      { label: "Competitive analysis", type: "doc", url: "#" }
+    ]
+  }
+];
+
+// ============================================
+// STATE
+// ============================================
+let features = JSON.parse(JSON.stringify(FEATURES));
+let cutLineIndex = 8;
+const MAX_CAPACITY = 10;
+const WEEKS_IN_QUARTER = 12;
+let activeAgent = 'analyst';
+let expandedCard = null;
+let dragIndex = null;
+let chatHistory = [];
+let chatHistoryPerAgent = { analyst: [], po: [] };
+let agentInitialized = { analyst: false, po: false };
+
+// ============================================
+// HELPERS
+// ============================================
+function calcScore(f) {
+  return Math.round((f.impact * f.confidence) / Math.max(f.effort, 1) * 10) / 10;
+}
+
+function sortFeatures() {
+  const above = features.slice(0, cutLineIndex).sort((a, b) => calcScore(b) - calcScore(a));
+  const below = features.slice(cutLineIndex).sort((a, b) => calcScore(b) - calcScore(a));
+  features = [...above, ...below];
+}
+
+function sourceColor(source) {
+  return { customer: 'bg-blue-50 text-blue-700', internal: 'bg-purple-50 text-purple-700', sales: 'bg-amber-50 text-amber-700', support: 'bg-rose-50 text-rose-700' }[source] || 'bg-surface-100 text-ink-700';
+}
+
+function themeColor(theme) {
+  return {
+    'Enterprise': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+    'Core Product': 'bg-sky-50 text-sky-700 border-sky-200',
+    'AI Features': 'bg-violet-50 text-violet-700 border-violet-200',
+    'Mobile': 'bg-teal-50 text-teal-700 border-teal-200',
+    'Infrastructure': 'bg-slate-50 text-slate-600 border-slate-200',
+    'Growth': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    'Integrations': 'bg-orange-50 text-orange-700 border-orange-200',
+    'UX Polish': 'bg-pink-50 text-pink-700 border-pink-200',
+  }[theme] || 'bg-surface-100 text-ink-700 border-surface-200';
+}
+
+function themeBgSolid(theme) {
+  return {
+    'Enterprise': '#818cf8', 'Core Product': '#38bdf8', 'AI Features': '#a78bfa',
+    'Mobile': '#2dd4bf', 'Infrastructure': '#94a3b8', 'Growth': '#34d399',
+    'Integrations': '#fb923c', 'UX Polish': '#f472b6',
+  }[theme] || '#94a3b8';
+}
+
+function scoreColorClass(s) { return s >= 12 ? 'text-green-600' : s >= 8 ? 'text-accent-600' : s >= 5 ? 'text-amber-600' : 'text-red-500'; }
+function scoreBarColor(s) { return s >= 12 ? 'bg-green-500' : s >= 8 ? 'bg-accent-500' : s >= 5 ? 'bg-amber-500' : 'bg-red-400'; }
+
+// Source type icon
+function sourceTypeIcon(type) {
+  const icons = {
+    slack: '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zm1.271 0a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834zm0 1.271a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834zm-1.27 0a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.163 0a2.528 2.528 0 0 1 2.523 2.522v6.312zM15.163 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.163 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52zm0-1.27a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.315A2.528 2.528 0 0 1 24 15.163a2.528 2.528 0 0 1-2.522 2.523h-6.315z"/></svg>',
+    dashboard: '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>',
+    doc: '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
+    meeting: '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>',
+    support: '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"/></svg>'
+  };
+  return icons[type] || icons.doc;
+}
+
+// ============================================
+// RENDER: Feature Cards
+// ============================================
+function renderFeatures() {
+  const container = document.getElementById('features-container');
+  container.innerHTML = '';
+
+  // Edge case: empty backlog
+  if (features.length === 0) {
+    container.innerHTML = `
+      <div class="bg-white rounded-lg border-2 border-dashed border-surface-200 p-8 text-center card-enter">
+        <div class="w-10 h-10 rounded-full bg-surface-100 flex items-center justify-center mx-auto mb-3">
+          <svg class="w-5 h-5 text-surface-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+        </div>
+        <p class="text-sm font-medium text-ink-700/50 mb-1">No features yet</p>
+        <p class="text-xs text-ink-700/30">Click "Add feature" to start building your backlog.</p>
+      </div>
+    `;
+    return;
+  }
+
+  features.forEach((f, i) => {
+    const score = calcScore(f);
+    const isBelow = i >= cutLineIndex;
+    const isExpanded = expandedCard === f.id;
+
+    if (i === cutLineIndex) container.appendChild(createCutLine());
+
+    const card = document.createElement('div');
+    card.className = `feature-card bg-white rounded-lg border border-surface-200 ${isBelow ? 'below-line' : ''} cursor-pointer`;
+    card.dataset.index = i;
+    card.draggable = true;
+
+    const sourcesHtml = (f.sources || []).map(s => `
+      <a href="${s.url}" class="source-link inline-flex items-center gap-1 px-2 py-1 rounded-md bg-surface-50 border border-surface-200 text-ink-700/70 hover:text-accent-600 text-[10px]" onclick="event.stopPropagation()">
+        ${sourceTypeIcon(s.type)}
+        <span>${s.label}</span>
+      </a>
+    `).join('');
+
+    card.innerHTML = `
+      <div class="px-4 py-3 flex items-center gap-3" onclick="toggleExpand(${f.id})">
+        <div class="flex-shrink-0 text-surface-300 hover:text-ink-700 cursor-grab active:cursor-grabbing">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
+            <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
+            <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
+          </svg>
+        </div>
+        <span class="flex-shrink-0 w-5 text-xs font-medium text-ink-700/40 text-right">${i + 1}</span>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-medium text-ink-900 truncate">${f.title}</span>
+            <span class="flex-shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded-full ${sourceColor(f.source)}">${f.source}</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <div class="w-16 h-1.5 bg-surface-100 rounded-full overflow-hidden">
+            <div class="score-bar h-full ${scoreBarColor(score)} rounded-full" style="width: ${Math.min(score / 18 * 100, 100)}%"></div>
+          </div>
+          <span class="text-sm font-semibold ${scoreColorClass(score)} w-8 text-right" id="score-display-${f.id}">${score}</span>
+        </div>
+        <!-- Delete -->
+        <button class="delete-btn flex-shrink-0 w-6 h-6 rounded-md flex items-center justify-center text-surface-300 hover:text-red-500 hover:bg-red-50 transition-colors" onclick="event.stopPropagation(); deleteFeature(${f.id}, this)" title="Remove">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+        <svg class="w-4 h-4 text-surface-300 transition-transform ${isExpanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+
+      ${isExpanded ? `
+      <div class="px-4 pb-4 pt-1 border-t border-surface-100 card-enter">
+        <!-- Editable title -->
+        <div class="flex items-center gap-2 mb-2">
+          <input
+            type="text"
+            value="${f.title.replace(/"/g, '&quot;')}"
+            class="text-sm font-semibold text-ink-900 bg-transparent border-b border-transparent hover:border-surface-300 focus:border-accent-500 outline-none px-0 py-0.5 flex-1 transition-colors"
+            onchange="updateTitle(${f.id}, this.value)"
+            onkeydown="if(event.key==='Enter') this.blur()"
+            onclick="event.stopPropagation()"
+          />
+          <span class="text-[10px] text-ink-700/30">click to edit</span>
+        </div>
+
+        <!-- Editable description -->
+        <textarea
+          class="text-xs text-ink-700/60 mb-3 w-full bg-transparent border border-transparent hover:border-surface-200 focus:border-accent-500 rounded-md outline-none px-1 py-0.5 resize-none transition-colors"
+          rows="2"
+          onchange="updateDescription(${f.id}, this.value)"
+          onclick="event.stopPropagation()"
+        >${f.description}</textarea>
+
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-[10px] font-medium px-2 py-0.5 rounded-full border ${themeColor(f.theme)}">${f.theme}</span>
+          <span class="text-[10px] text-ink-700/40">&middot;</span>
+          <span class="text-[10px] text-ink-700/50">${f.sourceDetail}</span>
+        </div>
+
+        <!-- Data citation -->
+        <div class="bg-accent-50 rounded-md px-3 py-2 mb-3 flex items-start gap-2">
+          <svg class="w-3.5 h-3.5 text-accent-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+          <p class="text-xs text-accent-700">${f.dataNote}</p>
+        </div>
+
+        <!-- Sources -->
+        ${sourcesHtml ? `
+        <div class="mb-4">
+          <p class="text-[10px] font-medium text-ink-700/40 uppercase tracking-wider mb-1.5">Sources</p>
+          <div class="flex flex-wrap gap-1.5">${sourcesHtml}</div>
+        </div>
+        ` : ''}
+
+        <!-- Sliders -->
+        <div class="space-y-2.5">
+          <div class="flex items-center gap-3">
+            <label class="text-xs text-ink-700/60 w-16">Impact</label>
+            <input type="range" min="1" max="10" value="${f.impact}" class="flex-1" oninput="updateScore(${f.id}, 'impact', this.value)" />
+            <span class="text-xs font-medium text-ink-800 w-5 text-right" id="val-impact-${f.id}">${f.impact}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <label class="text-xs text-ink-700/60 w-16">Effort</label>
+            <input type="range" min="1" max="10" value="${f.effort}" class="flex-1" oninput="updateScore(${f.id}, 'effort', this.value)" />
+            <span class="text-xs font-medium text-ink-800 w-5 text-right" id="val-effort-${f.id}">${f.effort}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <label class="text-xs text-ink-700/60 w-16">Confidence</label>
+            <input type="range" min="1" max="10" value="${f.confidence}" class="flex-1" oninput="updateScore(${f.id}, 'confidence', this.value)" />
+            <span class="text-xs font-medium text-ink-800 w-5 text-right" id="val-confidence-${f.id}">${f.confidence}</span>
+          </div>
+        </div>
+      </div>
+      ` : ''}
+    `;
+
+    // Drag events
+    card.addEventListener('dragstart', (e) => { dragIndex = i; card.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; });
+    card.addEventListener('dragend', () => { card.classList.remove('dragging'); document.querySelectorAll('.drag-over-top, .drag-over-bottom').forEach(el => el.classList.remove('drag-over-top', 'drag-over-bottom')); dragIndex = null; });
+    card.addEventListener('dragover', (e) => { e.preventDefault(); const rect = card.getBoundingClientRect(); const mid = rect.top + rect.height / 2; card.classList.remove('drag-over-top', 'drag-over-bottom'); card.classList.add(e.clientY < mid ? 'drag-over-top' : 'drag-over-bottom'); });
+    card.addEventListener('dragleave', () => card.classList.remove('drag-over-top', 'drag-over-bottom'));
+    card.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const targetIndex = parseInt(card.dataset.index);
+      if (dragIndex !== null && dragIndex !== targetIndex) {
+        const [moved] = features.splice(dragIndex, 1);
+        if (dragIndex < cutLineIndex && targetIndex >= cutLineIndex) cutLineIndex--;
+        else if (dragIndex >= cutLineIndex && targetIndex < cutLineIndex) cutLineIndex++;
+        features.splice(targetIndex, 0, moved);
+        renderAll();
+      }
+    });
+
+    container.appendChild(card);
+  });
+
+  if (cutLineIndex >= features.length) container.appendChild(createCutLine());
+}
+
+function createCutLine() {
+  const line = document.createElement('div');
+  line.className = 'cut-line py-2 my-1';
+  line.draggable = true;
+
+  const inCount = cutLineIndex;
+  const outCount = features.length - cutLineIndex;
+  let label = `Cut Line &middot; ${inCount} in &middot; ${outCount} out`;
+  let extraClass = '';
+
+  if (inCount === 0) {
+    label = 'Cut Line &middot; Nothing planned yet &middot; drag down to add';
+    extraClass = 'text-amber-600 bg-amber-50';
+  } else if (outCount === 0) {
+    label = `Cut Line &middot; All ${inCount} features in &middot; none parked`;
+    extraClass = 'text-green-600 bg-green-50';
+  } else {
+    extraClass = 'text-accent-600 bg-accent-50';
+  }
+
+  line.innerHTML = `
+    <div class="flex items-center gap-3">
+      <div class="cut-line-inner flex-1"></div>
+      <span class="badge-pop text-[10px] font-semibold uppercase tracking-wider whitespace-nowrap px-2 py-0.5 rounded-full ${extraClass}">
+        ${label}
+      </span>
+      <div class="cut-line-inner flex-1"></div>
+    </div>
+  `;
+  line.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', 'cutline'); e.dataTransfer.effectAllowed = 'move'; });
+  return line;
+}
+
+function setupCutLineDrop() {
+  const container = document.getElementById('features-container');
+  container.addEventListener('drop', (e) => {
+    if (e.dataTransfer.getData('text/plain') === 'cutline') {
+      const cards = document.querySelectorAll('.feature-card');
+      let newIndex = features.length;
+      cards.forEach((card) => {
+        const rect = card.getBoundingClientRect();
+        const idx = parseInt(card.dataset.index);
+        if (e.clientY < rect.top + rect.height / 2 && idx < newIndex) newIndex = idx;
+      });
+      cutLineIndex = Math.max(0, Math.min(features.length, newIndex));
+      renderAll();
+    }
+  });
+  container.addEventListener('dragover', (e) => e.preventDefault());
+}
+
+function toggleExpand(id) {
+  expandedCard = expandedCard === id ? null : id;
+  renderFeatures();
+}
+
+function updateTitle(id, value) {
+  const f = features.find(f => f.id === id);
+  if (f && value.trim()) { f.title = value.trim(); }
+}
+
+function updateDescription(id, value) {
+  const f = features.find(f => f.id === id);
+  if (f) { f.description = value; }
+}
+
+function updateScore(id, field, value) {
+  const f = features.find(f => f.id === id);
+  if (f) {
+    f[field] = parseInt(value);
+    document.getElementById(`val-${field}-${id}`).textContent = value;
+    // Pulse the score display
+    const scoreEl = document.getElementById(`score-display-${id}`);
+    if (scoreEl) {
+      const newScore = calcScore(f);
+      scoreEl.textContent = newScore;
+      scoreEl.classList.remove('score-pulse');
+      void scoreEl.offsetWidth; // force reflow
+      scoreEl.classList.add('score-pulse');
+    }
+    clearTimeout(window._sortTimer);
+    window._sortTimer = setTimeout(() => { sortFeatures(); renderAll(); }, 600);
+  }
+}
+
+// ============================================
+// DELETE FEATURE (with undo)
+// ============================================
+let undoTimer = null;
+
+function deleteFeature(id, btnEl) {
+  const card = btnEl.closest('.feature-card');
+  if (!card) return;
+
+  card.classList.add('card-deleting');
+
+  setTimeout(() => {
+    const idx = features.findIndex(f => f.id === id);
+    if (idx === -1) return;
+
+    const deletedFeature = { ...features[idx] };
+    const wasAboveCut = idx < cutLineIndex;
+    const deletedIdx = idx;
+
+    if (wasAboveCut) cutLineIndex = Math.max(0, cutLineIndex - 1);
+    features.splice(idx, 1);
+    if (expandedCard === id) expandedCard = null;
+
+    renderAll();
+    checkPlanDelight();
+
+    // Show undo toast
+    showUndoToast(deletedFeature.title, () => {
+      // Undo: reinsert at original position
+      features.splice(Math.min(deletedIdx, features.length), 0, deletedFeature);
+      if (wasAboveCut) cutLineIndex++;
+      sortFeatures();
+      renderAll();
+    });
+  }, 350);
+}
+
+function showUndoToast(featureName, undoFn) {
+  const container = document.getElementById('toast-container');
+  if (undoTimer) clearTimeout(undoTimer);
+
+  container.innerHTML = `
+    <div class="undo-toast bg-ink-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs" id="undo-toast-inner">
+      <span class="text-white/70">Removed <strong class="text-white font-medium">${featureName}</strong></span>
+      <button id="undo-btn" class="px-2.5 py-1 bg-white/15 hover:bg-white/25 rounded-md font-medium transition-colors">Undo</button>
+    </div>
+  `;
+
+  document.getElementById('undo-btn').addEventListener('click', () => {
+    undoFn();
+    dismissToast();
+  });
+
+  undoTimer = setTimeout(() => dismissToast(), 5000);
+}
+
+function dismissToast() {
+  const inner = document.getElementById('undo-toast-inner');
+  if (inner) {
+    inner.classList.add('hiding');
+    setTimeout(() => {
+      document.getElementById('toast-container').innerHTML = '';
+    }, 250);
+  }
+  if (undoTimer) { clearTimeout(undoTimer); undoTimer = null; }
+}
+
+
+// ============================================
+// CONFETTI
+// ============================================
+let confettiActive = false;
+
+function fireConfetti() {
+  if (confettiActive) return;
+  confettiActive = true;
+
+  const canvas = document.getElementById('confetti-canvas');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+
+  const colors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+  const particles = [];
+
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+      y: canvas.height / 2,
+      vx: (Math.random() - 0.5) * 12,
+      vy: -(Math.random() * 10 + 4),
+      color: colors[Math.floor(Math.random() * colors.length)],
+      size: Math.random() * 6 + 3,
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 10,
+      gravity: 0.15 + Math.random() * 0.1,
+      opacity: 1,
+      shape: Math.random() > 0.5 ? 'rect' : 'circle'
+    });
+  }
+
+  let frame = 0;
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+
+    particles.forEach(p => {
+      p.vy += p.gravity;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rotation += p.rotationSpeed;
+      p.opacity -= 0.008;
+      p.vx *= 0.99;
+
+      if (p.opacity <= 0) return;
+      alive = true;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rotation * Math.PI) / 180);
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = p.color;
+
+      if (p.shape === 'rect') {
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+      } else {
+        ctx.beginPath();
+        ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    frame++;
+    if (alive && frame < 180) {
+      requestAnimationFrame(animate);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      confettiActive = false;
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+// Check if plan fits capacity — trigger delight
+let lastPlanState = null;
+
+function checkPlanDelight() {
+  const aboveLine = features.slice(0, cutLineIndex);
+  if (aboveLine.length === 0) { lastPlanState = null; return; }
+
+  function effortToWeeks(effort) {
+    if (effort <= 3) return 1;
+    if (effort <= 5) return 2;
+    if (effort <= 7) return 3;
+    if (effort <= 9) return 4;
+    return 5;
+  }
+
+  const streamEnd = [0, 0];
+  aboveLine.forEach(f => {
+    const weeks = effortToWeeks(f.effort);
+    const best = streamEnd[0] <= streamEnd[1] ? 0 : 1;
+    streamEnd[best] += weeks;
+  });
+  const maxWeek = Math.max(...streamEnd);
+  const fitsNow = maxWeek <= WEEKS_IN_QUARTER;
+
+  // Celebrate when going from over-capacity to fits!
+  if (lastPlanState === false && fitsNow) {
+    fireConfetti();
+    const ganttEl = document.getElementById('gantt-container');
+    if (ganttEl) {
+      ganttEl.classList.remove('plan-success');
+      void ganttEl.offsetWidth;
+      ganttEl.classList.add('plan-success');
+    }
+  }
+  lastPlanState = fitsNow;
+}
+
+// ============================================
+// ADD FEATURE (with source linking)
+// ============================================
+let nextId = 15;
+let pendingSources = []; // sources being added in the form
+
+function toggleAddForm() {
+  const form = document.getElementById('add-feature-form');
+  const isHidden = form.classList.contains('hidden');
+  form.classList.toggle('hidden');
+  if (isHidden) {
+    pendingSources = [];
+    renderPendingSources();
+    document.getElementById('new-feature-title').value = '';
+    document.getElementById('new-source-label').value = '';
+    document.getElementById('new-feature-title').focus();
+  }
+}
+
+function addSourceToNew() {
+  const typeEl = document.getElementById('new-source-type');
+  const labelEl = document.getElementById('new-source-label');
+  const label = labelEl.value.trim();
+  if (!label) { labelEl.focus(); return; }
+
+  pendingSources.push({ label, type: typeEl.value, url: '#' });
+  labelEl.value = '';
+  labelEl.focus();
+  renderPendingSources();
+}
+
+function removeSourceFromNew(idx) {
+  pendingSources.splice(idx, 1);
+  renderPendingSources();
+}
+
+function renderPendingSources() {
+  const container = document.getElementById('new-feature-sources');
+  container.innerHTML = pendingSources.map((s, i) => `
+    <span class="new-source-tag inline-flex items-center gap-1 px-2 py-1 rounded-md bg-surface-50 border border-surface-200 text-ink-700/70 text-[10px]">
+      ${sourceTypeIcon(s.type)}
+      <span>${s.label}</span>
+      <button onclick="removeSourceFromNew(${i})" class="ml-0.5 text-ink-700/30 hover:text-red-500 transition-colors">&times;</button>
+    </span>
+  `).join('');
+}
+
+function addFeature() {
+  const titleInput = document.getElementById('new-feature-title');
+  const title = titleInput.value.trim();
+  if (!title) { titleInput.focus(); return; }
+
+  const source = document.getElementById('new-feature-source').value;
+  const theme = document.getElementById('new-feature-theme').value;
+
+  const linkedSources = pendingSources.length > 0
+    ? [...pendingSources]
+    : [{ label: "Pending analysis", type: "doc", url: "#" }];
+
+  const newFeature = {
+    id: nextId++,
+    title,
+    description: "Newly added during planning session. Analyst will enrich with data.",
+    source,
+    sourceDetail: "Added manually during Q3 planning",
+    impact: 5,
+    effort: 5,
+    confidence: 5,
+    theme,
+    dataNote: "Pending enrichment. The Analyst agent will pull supporting data from connected sources.",
+    sources: linkedSources
+  };
+
+  // Add below the cut line (backlog, not committed)
+  features.push(newFeature);
+
+  // Reset form
+  titleInput.value = '';
+  toggleAddForm();
+
+  // Sort and render
+  sortFeatures();
+  renderAll();
+
+  // Expand the new card
+  expandedCard = newFeature.id;
+  renderFeatures();
+
+  // Scroll to it
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.feature-card');
+    cards.forEach(card => {
+      if (card.querySelector(`[id="val-impact-${newFeature.id}"]`)) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  }, 100);
+
+  // Agent acknowledges
+  if (activeAgent === 'analyst') {
+    setTimeout(() => {
+      chatHistory.push({ type: 'agent', text: `Added **${title}** to the backlog with default scores (5/5/5). I'll pull data from connected sources to refine the scores. Expand the card to adjust manually if needed.` });
+      renderChat();
+      scrollChatBottom();
+    }, 800);
+  }
+}
+
+// ============================================
+// RENDER: Gantt Chart (parallel scheduling)
+// ============================================
+function renderGantt() {
+  const container = document.getElementById('gantt-container');
+  const countEl = document.getElementById('plan-count');
+  const aboveLine = features.slice(0, cutLineIndex);
+  countEl.textContent = `${aboveLine.length} features`;
+
+  if (aboveLine.length === 0) {
+    container.innerHTML = `
+      <div class="p-8 text-center">
+        <div class="w-10 h-10 rounded-full bg-surface-100 flex items-center justify-center mx-auto mb-3">
+          <svg class="w-5 h-5 text-surface-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <p class="text-sm font-medium text-ink-700/50 mb-1">No features in the plan</p>
+        <p class="text-xs text-ink-700/30">Drag the cut line down to add features to Q3.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Map effort to weeks
+  function effortToWeeks(effort) {
+    if (effort <= 3) return 1;
+    if (effort <= 5) return 2;
+    if (effort <= 7) return 3;
+    if (effort <= 9) return 4;
+    return 5;
+  }
+
+  // Parallel bin-packing: 2 work streams
+  const NUM_STREAMS = 2;
+  const streamEnd = new Array(NUM_STREAMS).fill(0); // tracks when each stream is free
+
+  let schedule = [];
+  let maxWeekUsed = 0;
+
+  aboveLine.forEach(f => {
+    const weeks = effortToWeeks(f.effort);
+
+    // Find the stream that frees up earliest
+    let bestStream = 0;
+    for (let s = 1; s < NUM_STREAMS; s++) {
+      if (streamEnd[s] < streamEnd[bestStream]) bestStream = s;
+    }
+
+    const startWeek = streamEnd[bestStream];
+    streamEnd[bestStream] = startWeek + weeks;
+    maxWeekUsed = Math.max(maxWeekUsed, startWeek + weeks);
+
+    schedule.push({ ...f, startWeek, weeks, stream: bestStream });
+  });
+
+  const isOverCapacity = maxWeekUsed > WEEKS_IN_QUARTER;
+  const displayWeeks = WEEKS_IN_QUARTER; // always show 12 weeks
+
+  // Week labels
+  const weekLabels = Array.from({ length: displayWeeks }, (_, i) => `W${i + 1}`);
+  const monthBounds = [
+    { label: 'Jul', start: 0, end: 4 },
+    { label: 'Aug', start: 4, end: 8 },
+    { label: 'Sep', start: 8, end: 12 }
+  ];
+
+  container.innerHTML = `
+    <div>
+      <!-- Stream labels -->
+      <div class="flex items-center gap-3 px-3 py-2 border-b border-surface-100 bg-surface-50/30">
+        <span class="text-[10px] font-medium text-ink-700/40">Parallel work streams (${NUM_STREAMS} tracks)</span>
+        <span class="text-[10px] text-ink-700/30">&middot;</span>
+        <span class="text-[10px] font-medium ${isOverCapacity ? 'text-red-600' : 'text-green-600'}">
+          ${maxWeekUsed}w needed / ${displayWeeks}w available${isOverCapacity ? ' — over capacity' : ''}
+        </span>
+        ${isOverCapacity ? `
+        <div class="w-24 h-1.5 bg-surface-200 rounded-full overflow-hidden">
+          <div class="h-full rounded-full bg-red-500" style="width: 100%"></div>
+        </div>
+        ` : `
+        <div class="w-24 h-1.5 bg-surface-200 rounded-full overflow-hidden">
+          <div class="h-full rounded-full bg-green-500 transition-all" style="width: ${(maxWeekUsed / displayWeeks) * 100}%"></div>
+        </div>
+        `}
+      </div>
+
+      <!-- Month headers -->
+      <div class="flex border-b border-surface-100">
+        <div class="w-44 flex-shrink-0 px-3 py-2"></div>
+        <div class="flex-1 flex">
+          ${monthBounds.map(m => `
+            <div class="flex-1 text-center py-1.5 text-[10px] font-semibold text-ink-700/50 uppercase tracking-wider border-l border-surface-100 first:border-l-0">${m.label}</div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Week headers -->
+      <div class="flex border-b border-surface-200">
+        <div class="w-44 flex-shrink-0 px-3 py-1.5">
+          <span class="text-[10px] font-medium text-ink-700/40">Feature</span>
+        </div>
+        <div class="flex-1 flex">
+          ${weekLabels.map((w, i) => `
+            <div class="flex-1 text-center py-1.5 text-[9px] text-ink-700/30 ${i % 4 === 0 ? 'border-l border-surface-100' : ''}">${w}</div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Feature rows -->
+      ${schedule.map((f, idx) => {
+        const leftPct = (f.startWeek / displayWeeks) * 100;
+        const widthPct = (f.weeks / displayWeeks) * 100;
+        const color = themeBgSolid(f.theme);
+        const overflows = f.startWeek + f.weeks > displayWeeks;
+        const clampedWidth = overflows
+          ? ((displayWeeks - f.startWeek) / displayWeeks) * 100
+          : widthPct;
+
+        return `
+        <div class="gantt-row flex items-center border-b border-surface-50 hover:bg-surface-50/50 transition-colors ${idx % 2 === 0 ? '' : 'bg-surface-50/30'}" style="animation-delay: ${idx * 60}ms">
+          <div class="w-44 flex-shrink-0 px-3 py-2.5 flex items-center gap-2">
+            <span class="text-[9px] font-medium text-ink-700/30 w-3">${f.stream + 1}</span>
+            <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background: ${color}"></span>
+            <span class="text-xs text-ink-800 truncate" title="${f.title}">${f.title}</span>
+          </div>
+          <div class="flex-1 relative h-8 overflow-hidden">
+            ${weekLabels.map((_, i) => i % 4 === 0 ? `<div class="absolute top-0 bottom-0 border-l border-surface-100" style="left: ${(i / displayWeeks) * 100}%"></div>` : '').join('')}
+            <div
+              class="gantt-bar absolute top-1.5 h-5 rounded-md flex items-center px-2 cursor-default"
+              style="left: ${leftPct}%; width: ${clampedWidth}%; background: ${color};${overflows ? ' border-right: 3px solid rgba(255,255,255,0.5); border-top-right-radius: 0; border-bottom-right-radius: 0;' : ''}"
+              title="${f.title} — ${f.weeks}w (effort ${f.effort}) — Stream ${f.stream + 1}"
+            >
+              <span class="text-[9px] font-medium text-white truncate">${f.weeks}w</span>
+              ${overflows ? '<span class="text-[8px] text-white/70 ml-1">spills</span>' : ''}
+            </div>
+          </div>
+        </div>
+        `;
+      }).join('')}
+
+      <!-- Today marker hint -->
+      <div class="relative h-0">
+        <div class="absolute top-0 border-l-2 border-dashed border-red-300" style="left: calc(${(0 / displayWeeks) * 100}% + 11rem); height: 0;"></div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================
+// RENDER: Capacity Bar (header)
+// ============================================
+function renderCapacity() {
+  const count = cutLineIndex;
+  const pct = Math.min((count / MAX_CAPACITY) * 100, 100);
+  const bar = document.getElementById('capacity-bar');
+  const text = document.getElementById('capacity-text');
+  bar.style.width = pct + '%';
+  bar.className = `capacity-fill h-full rounded-full ${count > MAX_CAPACITY ? 'bg-red-500' : count > 8 ? 'bg-amber-500' : 'bg-green-500'}`;
+  text.textContent = `${count}/${MAX_CAPACITY}`;
+  text.className = `text-xs font-medium ${count > MAX_CAPACITY ? 'text-red-600' : 'text-ink-700'}`;
+
+  // Capacity warning nudge
+  const indicator = document.getElementById('capacity-indicator');
+  const existingWarning = document.getElementById('capacity-warning');
+  if (existingWarning) existingWarning.remove();
+
+  if (count > MAX_CAPACITY) {
+    const warning = document.createElement('span');
+    warning.id = 'capacity-warning';
+    warning.className = 'text-[10px] text-red-600 font-medium badge-pop';
+    warning.textContent = `${count - MAX_CAPACITY} over — move features below the line`;
+    indicator.appendChild(warning);
+  }
+}
+
+// ============================================
+// CHAT: Agent Sidebar (Tabbed)
+// ============================================
+const AGENT_MESSAGES = {
+  analyst: [
+    { type: 'agent', text: "I've pre-scored all 14 features using support tickets, customer calls, and product analytics. Expand any card to see the data and adjust scores." },
+    { type: 'agent', text: "Top signal: **AI Meeting Summarizer** scores highest (16.2). 34% of NPS detractors mentioned meeting follow-ups. We can leverage the existing transcript pipeline." },
+    { type: 'agent', text: "Flag: **Custom Dashboards** has low confidence (6/10). Enterprise prospects want it, but effort is uncertain. I'd recommend a discovery spike before committing." }
+  ],
+  po: [
+    { type: 'agent', text: "You have **8 features** above the cut line. The Gantt shows ~24 weeks of work in a 12-week quarter. You're over capacity. Something needs to move." },
+    { type: 'agent', text: "Biggest risk: **Workflow Automations Builder** (4 weeks). It's the heaviest item. Consider de-scoping to a v1 with 3-4 trigger types, or push to Q4." },
+    { type: 'agent', text: "Quick swap: **Slack Threads to Tasks** (score 18.7) is below the line but only 1 week of effort. High impact, low cost. Worth pulling up." }
+  ]
+};
+
+const AGENT_RESPONSES = {
+  analyst: {
+    'why': "Scores use RICE: (Impact x Confidence) / Effort. Impact comes from customer frequency data and revenue signal. Confidence reflects data quality. Features with only internal signal get lower confidence.",
+    'sso': "SSO has strong signal: 8 enterprise accounts requested it, 3 are in active deals worth ~$240K combined ARR. SAML 2.0 is well-understood, keeping confidence high despite effort.",
+    'meeting': "AI Meeting Summarizer data is strong. We already process transcripts for search. Incremental effort to extract action items is ~2 sprints. NPS data shows it's the #1 pain point for managers.",
+    'dashboard': "Custom Dashboards is risky. The 2 enterprise deals ($180K) are real, but we lost 4 deals to Monday.com on this. That's competitive pressure, not necessarily product-market fit for us.",
+    'compare': "Head-to-head: AI Meeting Summarizer (16.2) vs SSO (10.3). Meeting Summarizer has higher confidence and lower effort. Both are customer-driven, but Meeting Summarizer addresses a broader user base while SSO is enterprise-only.",
+    'default': "I can pull more data on any feature. Ask about specific items, or I can compare two features head-to-head."
+  },
+  po: {
+    'move': "Done. Watch the Gantt timeline. If total weeks exceed 12, you'll see it turn red. What would you cut to make room?",
+    'conflict': "The SSO + Custom Dashboards overlap is real. Both touch auth and permissions. Put SSO in Month 1 (it's more defined) and push Dashboards to Month 2 after the auth groundwork is done.",
+    'swap': "If you pull Slack Threads to Tasks up and drop Dark Mode, you gain a high-impact integration (score 18.7, 1 week) and lose a nice-to-have (score 12, 1 week). Net positive on impact, neutral on capacity.",
+    'risk': "Biggest risk: Workflow Automations Builder (effort 9, ~4 weeks). If it slips, it eats into Month 3. Consider de-scoping to a v1 with 3-4 trigger types instead of a full visual builder.",
+    'over': "You're over the 12-week capacity. Options: 1) Remove the lowest-scoring item (Time Tracking, score 8.2). 2) De-scope Workflow Automations to 2 weeks. 3) Push Custom Dashboards to Q4 given low confidence.",
+    'default': "I can help with trade-offs, capacity, or risk flags. Try: \"What if we drop X?\" or \"Are we over capacity?\""
+  }
+};
+
+function switchAgent(agent) {
+  // Save current chat before switching
+  chatHistoryPerAgent[activeAgent] = [...chatHistory];
+
+  activeAgent = agent;
+
+  // Update tab styles
+  const tabA = document.getElementById('tab-analyst');
+  const tabP = document.getElementById('tab-po');
+  tabA.className = `agent-tab flex-1 rounded-lg border px-3 py-2 ${agent === 'analyst' ? 'active-analyst border-accent-500' : 'border-surface-200'}`;
+  tabP.className = `agent-tab flex-1 rounded-lg border px-3 py-2 ${agent === 'po' ? 'active-po border-violet-500' : 'border-surface-200'}`;
+
+  // Update placeholder
+  document.getElementById('chat-input').placeholder = agent === 'analyst'
+    ? 'Ask about scores, data, sources...'
+    : 'Ask about trade-offs, risks, capacity...';
+
+  // Restore or initialize chat for this agent
+  if (agentInitialized[agent]) {
+    chatHistory = [...chatHistoryPerAgent[agent]];
+    renderChat();
+    scrollChatBottom();
+  } else {
+    chatHistory = [];
+    renderChat();
+    loadAgentMessages(agent);
+    agentInitialized[agent] = true;
+  }
+}
+
+function loadAgentMessages(agent) {
+  const messages = AGENT_MESSAGES[agent];
+  messages.forEach((msg, i) => {
+    setTimeout(() => {
+      chatHistory.push(msg);
+      chatHistoryPerAgent[agent] = [...chatHistory];
+      renderChat();
+      scrollChatBottom();
+    }, (i + 1) * 700);
+  });
+}
+
+function renderChat() {
+  const container = document.getElementById('chat-messages');
+  const isAnalyst = activeAgent === 'analyst';
+  const avatarBg = isAnalyst ? 'bg-accent-100' : 'bg-violet-100';
+  const avatarText = isAnalyst ? 'text-accent-600' : 'text-violet-600';
+  const avatarLetter = isAnalyst ? 'A' : 'P';
+
+  container.innerHTML = chatHistory.map(msg => {
+    if (msg.type === 'agent') {
+      return `
+        <div class="chat-message flex gap-2">
+          <div class="w-5 h-5 rounded-full ${avatarBg} flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="text-[9px] font-bold ${avatarText}">${avatarLetter}</span>
+          </div>
+          <div class="bg-surface-50 rounded-lg px-3 py-2 text-xs text-ink-800 leading-relaxed">${formatMd(msg.text)}</div>
+        </div>`;
+    }
+    return `
+      <div class="chat-message flex justify-end">
+        <div class="bg-accent-600 text-white rounded-lg px-3 py-2 text-xs leading-relaxed max-w-[85%]">${msg.text}</div>
+      </div>`;
+  }).join('');
+}
+
+function formatMd(text) { return text.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>'); }
+function scrollChatBottom() { const c = document.getElementById('chat-messages'); c.scrollTop = c.scrollHeight; }
+
+function handleChatSend() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  chatHistory.push({ type: 'user', text });
+  chatHistoryPerAgent[activeAgent] = [...chatHistory];
+  renderChat();
+  scrollChatBottom();
+  input.value = '';
+
+  const responses = AGENT_RESPONSES[activeAgent];
+  const lower = text.toLowerCase();
+  let reply = responses.default;
+  for (const [key, val] of Object.entries(responses)) {
+    if (key !== 'default' && lower.includes(key)) { reply = val; break; }
+  }
+
+  // Typing indicator then respond
+  setTimeout(() => {
+    const isAnalyst = activeAgent === 'analyst';
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'chat-message flex gap-2';
+    typingDiv.id = 'typing-indicator';
+    typingDiv.innerHTML = `
+      <div class="w-5 h-5 rounded-full ${isAnalyst ? 'bg-accent-100' : 'bg-violet-100'} flex items-center justify-center flex-shrink-0 mt-0.5">
+        <span class="text-[9px] font-bold ${isAnalyst ? 'text-accent-600' : 'text-violet-600'}">${isAnalyst ? 'A' : 'P'}</span>
+      </div>
+      <div class="bg-surface-50 rounded-lg px-3 py-2"><div class="typing-indicator"><span></span><span></span><span></span></div></div>
+    `;
+    document.getElementById('chat-messages').appendChild(typingDiv);
+    scrollChatBottom();
+
+    setTimeout(() => {
+      const el = document.getElementById('typing-indicator');
+      if (el) el.remove();
+      chatHistory.push({ type: 'agent', text: reply });
+      chatHistoryPerAgent[activeAgent] = [...chatHistory];
+      renderChat();
+      scrollChatBottom();
+    }, 1000);
+  }, 300);
+}
+
+// ============================================
+// INIT
+// ============================================
+function renderAll() {
+  renderFeatures();
+  renderGantt();
+  renderCapacity();
+  checkPlanDelight();
+}
+
+// Init plan state tracking
+function initPlanState() {
+  const aboveLine = features.slice(0, cutLineIndex);
+  function effortToWeeks(e) { return e <= 3 ? 1 : e <= 5 ? 2 : e <= 7 ? 3 : e <= 9 ? 4 : 5; }
+  const se = [0, 0];
+  aboveLine.forEach(f => { const w = effortToWeeks(f.effort); const b = se[0] <= se[1] ? 0 : 1; se[b] += w; });
+  lastPlanState = Math.max(...se) <= WEEKS_IN_QUARTER;
+}
+
+sortFeatures();
+initPlanState();
+renderAll();
+setupCutLineDrop();
+agentInitialized.analyst = true;
+loadAgentMessages('analyst');
+
+document.getElementById('chat-send').addEventListener('click', handleChatSend);
+document.getElementById('chat-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleChatSend(); });
+
+// Global keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    // Close add form if open
+    const form = document.getElementById('add-feature-form');
+    if (!form.classList.contains('hidden')) { toggleAddForm(); return; }
+    // Close expanded card
+    if (expandedCard) { expandedCard = null; renderFeatures(); }
+  }
+});
+
+</script>
+</body>
+</html>
