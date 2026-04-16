@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quarterstack — Product POV</title>
+  <title>Quarterstack - Product POV</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script>
@@ -48,7 +48,7 @@
         <h1 class="text-sm font-semibold text-ink-900">Quarterstack</h1>
         <p class="text-[11px] text-ink-700/50">Product Point of View</p>
       </div>
-      <a href="index.html" class="ml-auto text-xs text-accent-600 hover:text-accent-700 font-medium flex items-center gap-1">
+      <a href="index.html" target="_blank" class="ml-auto text-xs text-accent-600 hover:text-accent-700 font-medium flex items-center gap-1">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
         Open Prototype
       </a>
@@ -73,7 +73,7 @@
         <h2 class="text-sm font-semibold text-ink-900">The Problem</h2>
       </div>
       <p class="text-sm text-ink-700/70 leading-relaxed">
-        PMs don't lack frameworks. Every PM knows RICE, ICE, MoSCoW. The actual failure mode in quarterly planning is <strong class="text-ink-900">context switching</strong>. You pull data from Amplitude, customer feedback from Slack, revenue signal from Sales, ticket counts from Support — then consolidate it all into a spreadsheet, apply a framework, debate trade-offs in a meeting, and produce a plan in a third tool. Each switch is cognitive load. By the time you have a plan, it's already stale.
+        PMs don't lack frameworks. Every PM knows RICE, ICE, MoSCoW. The actual failure mode in quarterly planning is <strong class="text-ink-900">context switching</strong>. You pull data from Amplitude, customer feedback from Slack, revenue signal from Sales, ticket counts from Support, then consolidate it all into a spreadsheet, apply a framework, debate trade-offs in a meeting, and produce a plan in a third tool. Each switch is cognitive load. By the time you have a plan, it's already stale.
       </p>
     </div>
 
@@ -89,7 +89,7 @@
       </div>
       <div class="bg-accent-50 border border-accent-100 rounded-xl px-5 py-4">
         <p class="text-sm font-medium text-accent-700 leading-relaxed">
-          Collapse the entire workflow into one continuous surface where scoring, deciding, and planning happen together — not sequentially.
+          Collapse the entire workflow into one continuous surface where scoring, deciding, and planning happen together, not sequentially.
         </p>
       </div>
       <p class="text-sm text-ink-700/70 leading-relaxed mt-4">
@@ -116,7 +116,7 @@
             <div>
               <h3 class="text-sm font-semibold text-ink-900 mb-1.5">No framework selection step</h3>
               <p class="text-xs text-ink-700/60 leading-relaxed mb-2">We auto-apply RICE and show a "How scores work" tooltip. No framework picker.</p>
-              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> Asking a PM to choose between RICE, ICE, and MoSCoW before they've even started is an analytical choice that adds friction with zero value. The framework is infrastructure — it should be invisible.</p>
+              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> Asking a PM to choose between RICE, ICE, and MoSCoW before they've even started is an analytical choice that adds friction with zero value. The framework is infrastructure. It should be invisible.</p>
             </div>
           </div>
         </div>
@@ -176,7 +176,7 @@
             <div>
               <h3 class="text-sm font-semibold text-ink-900 mb-1.5">Pre-enriched features with source links</h3>
               <p class="text-xs text-ink-700/60 leading-relaxed mb-2">Every card arrives with scores pre-filled, data citations, and clickable source links (Slack, dashboards, meeting notes).</p>
-              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> The biggest time sink isn't scoring — it's gathering context. The Analyst agent has already done this. The PM reviews and adjusts, rather than starting from scratch.</p>
+              <p class="text-xs text-ink-700/50 leading-relaxed"><span class="font-medium text-ink-700/70">Why:</span> The biggest time sink isn't scoring, it's gathering context. The Analyst agent has already done this. The PM reviews and adjusts, rather than starting from scratch.</p>
             </div>
           </div>
         </div>
@@ -265,7 +265,7 @@
           <span class="text-[10px] font-bold text-violet-600 bg-violet-50 px-1.5 py-0.5 rounded mt-0.5 flex-shrink-0">PD</span>
           <div>
             <p class="text-xs font-medium text-ink-800">Progressive Disclosure</p>
-            <p class="text-[11px] text-ink-700/50 mt-0.5">Collapsed cards show title + score. Expand for data, sources, sliders. Gantt appears below — you see it when ready.</p>
+            <p class="text-[11px] text-ink-700/50 mt-0.5">Collapsed cards show title + score. Expand for data, sources, sliders. Gantt appears below the backlog, visible when you're ready.</p>
           </div>
         </div>
 
@@ -273,7 +273,7 @@
           <span class="text-[10px] font-bold text-accent-600 bg-accent-50 px-1.5 py-0.5 rounded mt-0.5 flex-shrink-0">IF</span>
           <div>
             <p class="text-xs font-medium text-ink-800">Instant Feedback</p>
-            <p class="text-[11px] text-ink-700/50 mt-0.5">Drag cut line — plan updates. Adjust slider — score pulses, list reorders. Delete — slide-out + undo toast. Confetti when plan fits capacity.</p>
+            <p class="text-[11px] text-ink-700/50 mt-0.5">Drag cut line, plan updates instantly. Adjust slider, score pulses and list reorders. Delete a card, slide-out animation + undo toast. Confetti when plan fits capacity.</p>
           </div>
         </div>
 
@@ -332,6 +332,16 @@
             <span class="text-[10px] font-bold text-emerald-600">3</span>
           </div>
           <div>
+            <p class="text-sm font-medium text-ink-800">Domain-specific agents: Design, Engineering, QA</p>
+            <p class="text-xs text-ink-700/50 mt-1 leading-relaxed">Right now we have Analyst and PO. The next step is adding a Design agent that flags UX complexity, an Engineering agent that gives more accurate effort estimates based on codebase context, and a QA agent that identifies testing risks. Each agent brings domain expertise that a PM would normally get from separate meetings. The Gantt becomes more accurate because effort estimates come from the Engineering agent, not a generic 1-10 slider.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span class="text-[10px] font-bold text-emerald-600">4</span>
+          </div>
+          <div>
             <p class="text-sm font-medium text-ink-800">Scenario comparison</p>
             <p class="text-xs text-ink-700/50 mt-1 leading-relaxed">"What if we cut Custom Dashboards and add Slack integration instead?" Save two plan versions side-by-side. Compare effort, theme coverage, and risk profile. Make the trade-off visual, not verbal.</p>
           </div>
@@ -342,7 +352,7 @@
     <!-- Footer -->
     <div class="text-center pb-10">
       <div class="divider mb-6"></div>
-      <a href="index.html" class="inline-flex items-center gap-2 px-4 py-2 bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium rounded-lg transition-colors">
+      <a href="index.html" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-accent-600 hover:bg-accent-700 text-white text-xs font-medium rounded-lg transition-colors">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
         Try the Prototype
       </a>
